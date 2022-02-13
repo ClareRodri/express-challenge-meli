@@ -1,5 +1,5 @@
 const productService = require('../services/productService');
-const { appendSignature } = require('../utils/productUtil');
+const { appendSignature } = require('../utils/productUtils');
 
 const GetProducts = async(request, response, next) => {
     try {

@@ -1,6 +1,6 @@
 const axios = require('axios');
 const config = require('../../config');
-const { handleSearchResponse, mapProductItem } = require('../utils/productUtil');
+const { handleSearchResponse, mapProductItem } = require('../utils/productUtils');
 
 
 const searchProducts = async(query) => {
