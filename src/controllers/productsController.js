@@ -31,8 +31,10 @@ const GetProductDetail = async(request, response, next) => {
         }
 
         const productModel = {
-            ...detailedInfo,
-            description: basicInfo.description
+            item: {
+                ...detailedInfo,
+                description: basicInfo.description
+            }
         }
 
         const responseModel = appendSignature(productModel);
