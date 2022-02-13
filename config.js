@@ -1,5 +1,5 @@
 const config = {
-    port: 3000,
+    port: 3002,
     apiPrefix: '/api',
     baseMLApiUrl: 'https://api.mercadolibre.com/',
     signature: {
