@@ -4,16 +4,8 @@ const handleSearchResponse = (data) => {
     const productList = data.results.map(
         (product) => mapProductItem(product)
     );
-    const productCategoryList = data.results.map((w) => w.category_id);
-
-   
-    const categoriesList = data.filters.length > 0
-        ? data.filters.find((w) => w.id === 'category').values
-        : data.available_filters.length > 0
-            ? data.available_filters.find((w) => w.id === 'category').values
-            : [];
-
-    const categories = getCategoriesWeight(productCategoryList, categoriesList);
+    
+    const categories = getSearchMainCategory(productList, data);
     return {
         categories: categories,
         items: productList,
@@ -53,38 +45,57 @@ const appendSignature = (responseModel) => {
     };
 }
 
-const getCategoriesWeight = (productCategoryList, categoriesList) => {
-    let categories = [];
-    let categoryName = '';
-    let categoryMatch = '';
-    let indxCategoria = 0;
+///Search the main category from product results
+const getSearchMainCategory = (productList, searchResult) => {
+    const categoriesOcurrence = getSearchCategoriesWithOcurrence(productList);
 
-    if (productCategoryList == undefined || productCategoryList.length == 0 || categoriesList.length == 0) { categories = []; }
-    else {
-        productCategoryList.forEach(category => {
-            categoryMatch = categoriesList.find(p => p.id == category)
-            if (categoryMatch != undefined) {
-                categoryName = categoryMatch.name;
-                if (categories.length > 0) {
-                    indxCategoria = categories.findIndex(p => p.id == category);
-                    if (indxCategoria > -1) {
-                        categories[indxCategoria] = {
-                            id: category,
-                            title: categoryName,
-                            count: (categories[indxCategoria].count + 1)
-                        }
-                        return;
-                    }
-                }
-                categories.push({
-                    id: category,
-                    title: categoryName,
-                    count: 1
-                });
-            }
-        });
+    if(categoriesOcurrence.length === 0) {
+        return []
     }
-    return categories;
+
+    categoriesOcurrence.sort((a,b) => b.count - a.count);
+
+    const categoriesList = searchResult.filters.length > 0
+    ? searchResult.filters.find((w) => w.id === 'category').values
+    : searchResult.available_filters.length > 0
+        ? searchResult.available_filters.find((w) => w.id === 'category').values
+        : [];    
+
+    if(categoriesList.length === 0) {
+        return [];
+    }
+    
+    const mostRepeatedCategory = categoriesList.find(
+        w => w.id == categoriesOcurrence[0].categoryId
+    );
+
+    if(mostRepeatedCategory === undefined) {
+        return [];
+    }
+
+    return mostRepeatedCategory.path_from_root.map(w => {
+        return {
+            title: w.name
+        }   
+    });    
+}
+
+///
+const getSearchCategoriesWithOcurrence = (productList) => {
+    const categoriesOcurrence = [];
+
+    productList.forEach(element => {
+       if(categoriesOcurrence.find(w => w.categoryId === element.category_id) === undefined)  {
+           categoriesOcurrence.push({
+               categoryId: element.category_id,
+               count: productList.reduce((n, product) => {
+                   return n + (product.category_id === element.category_id)
+               }, 0)
+           });
+       }
+    });
+
+    return categoriesOcurrence;
 }
 
 module.exports = {
