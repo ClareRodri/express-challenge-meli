@@ -25,7 +25,7 @@ const GetProductDetail = async(request, response, next) => {
         }
         const detailedInfo = await productService.getProductDetailedInfo(queryParam);
         const basicInfo = await productService.getProductBasicInfo(queryParam);
-
+        const categoryInfo = await productService.getCategoryInfo(detailedInfo.category_id);
         if(detailedInfo === undefined) {
             throw new Error('Unexpected error');
         }
@@ -33,12 +33,14 @@ const GetProductDetail = async(request, response, next) => {
         const productModel = {
             item: {
                 ...detailedInfo,
+                category: categoryInfo,
                 description: basicInfo.description
             }
         }
 
         const responseModel = appendSignature(productModel);
 
+       // console.log("responseModel", responseModel);
         response.status(200).send(responseModel);
         next();
     }catch(error) {
