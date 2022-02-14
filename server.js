@@ -14,7 +14,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(config.apiPrefix, routes)
 app.listen(config.port, () => console.log(`Running in port ${config.port}`))
 
-
 module.exports = {
   app
 }

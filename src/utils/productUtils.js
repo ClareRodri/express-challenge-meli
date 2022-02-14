@@ -1,37 +1,19 @@
 const config = require("../../config");
 
 const handleSearchResponse = (data) => {
-    let categoryName = "";
-    const categories = [];
     const productList = data.results.map(
         (product) => mapProductItem(product)
     );
     const productCategoryList = data.results.map((w) => w.category_id);
-    const categoriesList = data.filters.find((w) => w.id === 'category').values;
 
-    if (productCategoryList == undefined) { categories = []; }
-    else {
-        productCategoryList.forEach(category => {
-            categoryName = categoriesList.find(p => p.id == category).name;
+   
+    const categoriesList = data.filters.length > 0
+        ? data.filters.find((w) => w.id === 'category').values
+        : data.available_filters.length > 0
+            ? data.available_filters.find((w) => w.id === 'category').values
+            : [];
 
-            if (categories.length > 0) {
-                indxCategoria = categories.findIndex(p => p.id == category);
-                if (indxCategoria > -1) {
-                    categories[indxCategoria] = {
-                        id: category,
-                        title: categoryName,
-                        count: (categories[indxCategoria].count + 1)
-                    }
-                    return;
-                }
-            } 
-            categories.push({
-                id: category,
-                title: categoryName,
-                count: 1
-            });
-        });
-    }
+    const categories = getCategoriesWeight(productCategoryList, categoriesList);
     return {
         categories: categories,
         items: productList,
@@ -69,6 +51,40 @@ const appendSignature = (responseModel) => {
         },
         ...responseModel
     };
+}
+
+const getCategoriesWeight = (productCategoryList, categoriesList) => {
+    let categories = [];
+    let categoryName = '';
+    let categoryMatch = '';
+    let indxCategoria = 0;
+
+    if (productCategoryList == undefined || productCategoryList.length == 0 || categoriesList.length == 0) { categories = []; }
+    else {
+        productCategoryList.forEach(category => {
+            categoryMatch = categoriesList.find(p => p.id == category)
+            if (categoryMatch != undefined) {
+                categoryName = categoryMatch.name;
+                if (categories.length > 0) {
+                    indxCategoria = categories.findIndex(p => p.id == category);
+                    if (indxCategoria > -1) {
+                        categories[indxCategoria] = {
+                            id: category,
+                            title: categoryName,
+                            count: (categories[indxCategoria].count + 1)
+                        }
+                        return;
+                    }
+                }
+                categories.push({
+                    id: category,
+                    title: categoryName,
+                    count: 1
+                });
+            }
+        });
+    }
+    return categories;
 }
 
 module.exports = {
