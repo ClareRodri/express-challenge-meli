@@ -3,8 +3,8 @@ const config = require('../../config');
 const { handleSearchResponse, mapProductItem, mapCategories} = require('../utils/productUtils');
 
 
-const searchProducts = async(query) => {
-    const defaultUrl = `${config.baseMLApiUrl}sites/MCO/search?q=${query}`;
+const searchProducts = async({query, offset, limit}) => {
+    const defaultUrl = `${config.baseMLApiUrl}sites/MCO/search?q=${query}&offset=${offset}&limit=${limit}`;
     return await axios.get(defaultUrl)
         .then(function (response) {
        // console.log("searchProducts", response);

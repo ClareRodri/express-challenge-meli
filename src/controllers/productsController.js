@@ -3,12 +3,14 @@ const { appendSignature } = require('../utils/productUtils');
 
 const GetProducts = async(request, response, next) => {
     try {
-        const queryParam = request.query.q;
-        if(queryParam === undefined) {
+        const query = request.query.q;
+        const offset = request.query.offset;
+        const limit = request.query.limit;
+        if (query === undefined) {
             throw new Error('No search query found');
         }
-        const query = await productService.searchProducts(queryParam);
-        const responseModel = appendSignature(query);
+        const queryResponse = await productService.searchProducts({query, offset, limit});
+        const responseModel = appendSignature(queryResponse);
 
         response.status(200).send(responseModel);
         next();
